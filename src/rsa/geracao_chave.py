@@ -33,9 +33,11 @@ def chave_rsa(bits=1024):
     return (chave_publica, chave_privada)
 
 
+  # testes das funções !apagr!
 
+"""
 print(chave_rsa(bits=1024))
-
+"""
 
 """
 print(gerar_primo(512))
