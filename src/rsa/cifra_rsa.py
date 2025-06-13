@@ -37,3 +37,8 @@ def oeap_cifrar(message , tamanho_chave , label=b'' , hash_func=hashlib.sha256):
 
    mensagem_cifrada = b'\x00' + masked_seed + masked_dados
    return mensagem_cifrada
+
+def oeap_decifrar(mensagem_cifrada, tamanho_chave, label=b'', hash_func=hashlib.sha256):
+
+   
+#comentar codigo!!!!
