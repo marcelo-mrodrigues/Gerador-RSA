@@ -25,7 +25,7 @@ def oeap_cifrar(message , tamanho_chave , label=b'' , hash_func=hashlib.sha256):
    l_len = tamanho_chave - tamanho_mensagem - 2 * hash_tamanho - 2
    l = b'\x00' * l_len  # preenchimento
 
-   dados = hash_tamanho + l + b'\x01' + message
+   dados = hash + l + b'\x01' + message  ## Bug encontrado
 
    seed = os.urandom(hash_tamanho)
 
