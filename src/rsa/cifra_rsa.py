@@ -87,3 +87,15 @@ def cifrar(bytes , chave_publicas):
 
    return c
 #comentar codigo!!!!
+
+def decifrar(cifrado_inteiro , chave_privada):
+   n , d = chave_privada
+   tamanho_chave = (n.bit_length() + 7) // 8  # calcula o tamanho da chave em bytes
+
+     #decifragem RSA
+   m = pow(cifrado_inteiro, d, n)  # decifra a mensagem usando a chave privada
+   mensagem_cifrada = m.to_bytes(tamanho_chave, 'big')  # converte inteiro de volta para bytes
+
+   mensagem_original = oeap_decifrar(mensagem_cifrada, tamanho_chave)  # remove o padding OEAP
+
+   return mensagem_original  
