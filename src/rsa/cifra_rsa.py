@@ -75,6 +75,15 @@ def oeap_decifrar(mensagem_cifrada, tamanho_chave, label=b'', hash_func=hashlib.
    
    return dados[separador_index + 1:]  #retorna a mensagem decifrada
 
+def cifrar(bytes , chave_publicas):
 
+   n , e = chave_publicas
+   tamanho_chave = (n.bit_length() + 7) // 8  # calcula o tamanho da chave em bytes
+   # aplica padding OEAP
+   mensagem_cifrada = oeap_cifrar(bytes, tamanho_chave)
 
+   m = int.from_bytes(mensagem_cifrada, 'big')  # converte bytes para inteiro
+   c = pow(m, e, n)  # cifra a mensagem usando a chave pública
+
+   return c
 #comentar codigo!!!!
