@@ -39,6 +39,42 @@ def oeap_cifrar(message , tamanho_chave , label=b'' , hash_func=hashlib.sha256):
    return mensagem_cifrada
 
 def oeap_decifrar(mensagem_cifrada, tamanho_chave, label=b'', hash_func=hashlib.sha256):
+   tamanho_mensagem = len(mensagem_cifrada)
+   hash_tamanho = hash_func().digest_size
 
+   if tamanho_mensagem != tamanho_chave:
+      raise ValueError("Tamanho invalido")
    
+   y = mensagem_cifrada[0]
+   masked_seed = mensagem_cifrada[1: hash_tamanho + 1]
+   masked_dados = mensagem_cifrada[1 + hash_tamanho:]
+
+     #tira o masking do seed
+   seed_mask = gerar_mascara(masked_dados, hash_tamanho, hash_func)
+   seed = bytes( x ^ y for x, y in zip(masked_seed, seed_mask))
+
+     #tirra o masking do bloco de dados
+   dados_mask = gerar_mascara(seed , len(masked_dados), hash_func)
+   dados = bytes( x ^ y for x, y in zip(masked_dados, dados_mask))
+
+   l_hash_bloco = dados[ : hash_tamanho]  #separa o blodco de dados pra encontrar mensagem
+   l_hash = hash_func(label).digest()
+
+   if l_hash_bloco != l_hash or y != 0:
+      raise ValueError("erro na decodificacao")
+   
+   #encontra o separador 0x01
+   separador_index = -1
+   for i in range(hash_tamanho, len(dados)):
+      if dados[i] == 1:
+         separador_index = i
+         
+         break
+   if separador_index == -1:
+      raise ValueError("separador nao encontrado")
+   
+   return dados[separador_index + 1:]  #retorna a mensagem decifrada
+
+
+
 #comentar codigo!!!!
