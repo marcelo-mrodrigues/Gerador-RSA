@@ -99,3 +99,24 @@ def decifrar(cifrado_inteiro , chave_privada):
    mensagem_original = oeap_decifrar(mensagem_cifrada, tamanho_chave)  # remove o padding OEAP
 
    return mensagem_original  
+
+
+if __name__ == '__main__':
+    from geracao_chave import chave_rsa
+
+     # Gera um par de chaves
+    publica, privada = chave_rsa(1024)
+    
+    mensagem_original = b"Teste secreto para testar a completude das funcoes lerolerolero"  #### TESTE
+    print(f"\nmensagem original: {mensagem_original.decode()}")
+    
+    texto_cifrado = cifrar(mensagem_original, publica)
+    print(f"texto cifrado como inteiro: {texto_cifrado}")
+
+     # Decifrando
+    texto_decifrado = decifrar(texto_cifrado, privada)
+    print(f"texto decifrado: {texto_decifrado.decode()}")
+    
+    # Verificação
+    assert mensagem_original == texto_decifrado
+    print("Asserticva bem sucedida")
