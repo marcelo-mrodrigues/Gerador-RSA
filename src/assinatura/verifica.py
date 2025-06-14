@@ -53,7 +53,7 @@ def verificar(hash_decifrado: bytes, mensagem: bytes, hash_func=hashlib.sha3_256
 
 
 if __name__ == '__main__':
-    from .assina import aplicar_hash, assinar, formatar_assinatura
+    from .assina import aplicar_hash, assinar, formatar_base64
     from ..rsa.geracao_chave import chave_rsa
 
     # 1°) Gera chaves e assina o hash de uma mensagem (Parte II)
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     mensagem = b"Teste secreto para testar a completude das funcoes lerolerolero"
     hash_msg = aplicar_hash(mensagem)
     assinatura_int = assinar(hash_msg, privada)
-    assinatura_b64 = formatar_assinatura(assinatura_int, (publica[0].bit_length() + 7) // 8)
+    assinatura_b64 = formatar_base64(assinatura_int)
 
     # 2°) Parsing da assinatura (Base64 -> inteiro)
     assinatura_int = parse(assinatura_b64)

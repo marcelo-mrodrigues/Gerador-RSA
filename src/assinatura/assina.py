@@ -16,7 +16,7 @@ def aplicar_hash(bytes: bytes) -> bytes:
     return hashlib.sha3_256(bytes).digest()
 
 
-def assinar(hash_bytes: bytes, chave_privada: tuple) -> int:
+def assinar(hash_bytes: bytes, chave_privada: tuple) -> bytes:
     """
     Assina valor de hash ao criptografá-lo com a chave privada.
     
@@ -25,30 +25,61 @@ def assinar(hash_bytes: bytes, chave_privada: tuple) -> int:
         chave_privada (tuple): Chave privada (n,d) 
 
     Retorna:
-        int: Assinatura como inteiro
+        int: Assinatura em bytes
     """
     n, d = chave_privada
+    tamanho_chave = (chave_privada[0].bit_length() + 7) // 8
     m = int.from_bytes(hash_bytes, 'big') # Mensagem vira inteiro
     assinatura = pow(m, d, n) # c = m^d mod n
-    return assinatura
+    return assinatura.to_bytes(tamanho_chave, 'big')
 
 
-def formatar_assinatura(assinatura: int, tamanho_chave: int) -> str:
+def formatar_base64(data: bytes) -> str:
     """
-    Formata a assinatura como string base64.
+    Primitiva da formatação em BASE64.
 
     Parâmetros:
-        assinatura (int): Assinatura como inteiro
-        tamanho_chave (int): Tamanho da chave em bytes
+        data (bytes): Mensagem a ser formatada 
 
     Retorna:
-        str: Assinatura formatada na base64
+        str: Mensagem formatada na BASE64
     """
-    # Converte a assinatura de inteiro para bytes no tamanho de n
-    assinatura_bytes = assinatura.to_bytes(tamanho_chave, 'big')
-    # Codifica os bytes em string BASE64
-    assinatura_formatada = base64.b64encode(assinatura_bytes).decode()
-    return assinatura_formatada
+    BASE64_TABLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+
+    result = []
+
+    # Percorre os dados em blocos de 3 bytes em 3 bytes (24 bits)
+    for i in range(0, len(data), 3):
+        bloco = data[i:i + 3]
+        bloco_len = len(bloco) # Verifica se o bloco tem 1, 2 ou 3 bytes
+
+        # Converte o bloco de bytes em um inteiro
+        value = int.from_bytes(bloco, 'big')
+
+        # Calcula bits que faltam pra completar 3 bytes
+        missing_bits = (3 - bloco_len) * 8
+        
+        # Preenche com zeros no final pra completar 3 bytes
+        value <<= missing_bits
+
+        # Reparte inteiro de 3 bytes (24 bits) em 4 grupos de 6 bits
+        for j in range(4):
+            # Shift pra direita e máscara pra pegar os 6 bits
+            index = (value >> (18 - 6 * j)) & 0x3F
+            # Pega caractere correspondente na tabela da BASE64
+            result.append(BASE64_TABLE[index])
+
+    # Se o comprimento dos dados não for múltiplo de 3, precisa adicionar padding
+    # Sabendo que o último bloco deve ter 3 bytes:
+    #   - Se sobrar 1 byte: padding = 2 '=='
+    #   - Se sobrar 2 bytes: padding = 1 '='
+    padding = (3 - len(data) % 3) % 3
+
+    # Substitui últimos caracteres pelo padding se for preciso
+    if padding:
+        result[-padding:] = '=' * padding
+
+    return ''.join(result)
 
 
 if __name__ == '__main__':
@@ -56,7 +87,6 @@ if __name__ == '__main__':
     from ..rsa.geracao_chave import chave_rsa
 
     publica, privada = chave_rsa(1024)
-    tamanho_chave = (publica[0].bit_length() + 7) // 8  # Tamanho da chave em bytes
     mensagem = b"Teste secreto para testar a completude das funcoes lerolerolero"
 
     # 1°) Hasheando a mensagem
@@ -64,8 +94,8 @@ if __name__ == '__main__':
 
     # 2°) Assinando o hash
     assinatura = assinar(hash_mensagem, privada)
-    print("Assinatura (inteiro gigante):", assinatura) # Sem formatação
+    print("Assinatura (bytes):", assinatura.hex())
 
-    # 3°) Formatando a assinatura para base64
-    assinatura_base64 = formatar_assinatura(assinatura, tamanho_chave)
-    print("Assinatura (base64):", assinatura_base64) # Com formatação
+    # 3°) Convertendo assinatura para Base64
+    assinatura_base64 = formatar_base64(assinatura)
+    print("Assinatura (Base64):", assinatura_base64)
