@@ -59,14 +59,13 @@ if __name__ == '__main__':
     tamanho_chave = (publica[0].bit_length() + 7) // 8  # Tamanho da chave em bytes
     mensagem = b"Teste secreto para testar a completude das funcoes lerolerolero"
 
-    # Hasheando a mensagem
+    # 1°) Hasheando a mensagem
     hash_mensagem = aplicar_hash(mensagem)
 
-    # Assinando o hash
+    # 2°) Assinando o hash
     assinatura = assinar(hash_mensagem, privada)
     print("Assinatura (inteiro gigante):", assinatura) # Sem formatação
 
-    # Formatando a assinatura para base64
+    # 3°) Formatando a assinatura para base64
     assinatura_base64 = formatar_assinatura(assinatura, tamanho_chave)
     print("Assinatura (base64):", assinatura_base64) # Com formatação
-    
