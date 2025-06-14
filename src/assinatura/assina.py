@@ -1,5 +1,4 @@
 import hashlib
-import base64
 
 # ´´´python -m src.assinatura.assina
 
@@ -25,7 +24,7 @@ def assinar(hash_bytes: bytes, chave_privada: tuple) -> bytes:
         chave_privada (tuple): Chave privada (n,d) 
 
     Retorna:
-        int: Assinatura em bytes
+        bytes: Assinatura em bytes
     """
     n, d = chave_privada
     tamanho_chave = (chave_privada[0].bit_length() + 7) // 8

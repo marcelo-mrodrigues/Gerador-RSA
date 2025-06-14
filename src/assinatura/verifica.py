@@ -1,26 +1,46 @@
 import hashlib
-import base64
 
 # ´´´python -m src.assinatura.verifica
 
-def parse(assinatura_b64:str) -> int:
+def parse_base64(base64_string:str) -> bytes:
     """
-    Converte a assinatura da Base64 pra inteiro.
+    Primitiva do parsing de dados na BASE64.
 
     Parâmetros: 
-        assinatura_b64 (str): Assinatura formatada em Base64 (Parte II)
+        dados_b64 (string): dados formatados na Base64 (Parte II)
 
     Retorna:
-        int: Assinatura como inteiro grande
+        bytes: Dados parseados
     """
-    try:
-        assinatura_bytes = base64.b64decode(assinatura_b64)
-        return int.from_bytes(assinatura_bytes, 'big')
-    except ValueError as e:
-        raise ValueError(f'Erro na formatação da assinatura: {e}')
+    BASE64_TABLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
+    # Remove o padding '=' do final
+    base64_string = base64_string.rstrip('=')
 
-def decifrar_assinatura(assinatura: int, chave_publica: tuple) -> bytes:
+    # Armazena os bytes resultantes do parsing
+    result = bytearray()
+
+    value = 0 # Acumulador de bits
+    bits = 0 # Contador dos bits acumulados
+    
+    for char in base64_string:
+        # Ignora caracteres inválidos
+        if char not in BASE64_TABLE:
+            continue
+        
+        # Converte o caractere Base64 pro seu valor numérico (6 bits)
+        value = (value << 6) | BASE64_TABLE.index(char)
+        bits += 6 # Avança caractere
+        
+        # Caso acumule pelo menos 1 byte (8 bits), extrai
+        if bits >= 8:
+            bits -= 8
+            result.append((value >> bits) & 0xff) # Pega os 8 MSB
+            value &= (1 << bits) - 1 # Mantém os demais bits
+            
+    return bytes(result)
+
+def decifrar_assinatura(assinatura: bytes, chave_publica: tuple) -> bytes:
     """
     Decifra assinatura e obtém valor de hash.
 
@@ -32,8 +52,11 @@ def decifrar_assinatura(assinatura: int, chave_publica: tuple) -> bytes:
         bytes: Hash original (32 bytes do SHA-3)
     """
     n, e = chave_publica
-    hash_decifrado = pow(assinatura, e, n) # m = c^e mod n
-    return hash_decifrado.to_bytes(32, 'big')
+    assinatura_int = int.from_bytes(assinatura, 'big')
+    
+    # Decifra hash assinado com RSA    
+    hash_decifrado_int = pow(assinatura_int, e, n)
+    return hash_decifrado_int.to_bytes(32, 'big')
 
 
 def verificar(hash_decifrado: bytes, mensagem: bytes, hash_func=hashlib.sha3_256) -> bool:
@@ -64,10 +87,10 @@ if __name__ == '__main__':
     assinatura_b64 = formatar_base64(assinatura_int)
 
     # 2°) Parsing da assinatura (Base64 -> inteiro)
-    assinatura_int = parse(assinatura_b64)
+    assinatura_formatada = parse_base64(assinatura_b64)
     
     # 3°) Decifração (RSA com chave pública)
-    hash_recuperado = decifrar_assinatura(assinatura_int, publica)
+    hash_recuperado = decifrar_assinatura(assinatura_formatada, publica)
     
     # 4°) Verificação dos valores de hash
     if verificar(hash_recuperado, mensagem):
