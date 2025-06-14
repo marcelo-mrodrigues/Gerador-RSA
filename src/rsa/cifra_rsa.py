@@ -4,7 +4,7 @@ import math
 from unidecode import unidecode
 
 # MGF1 , bloco de bytes de tamanho fixo pseudoaleatório
-def gerar_mascara(seed, tamanho, hash_func=hashlib.sha256):
+def gerar_mascara(seed, tamanho, hash_func=hashlib.sha3_256):
     # 32 bytes para SHA-256
     hash_length = hash_func().digest_size
     num_blocks = math.ceil(tamanho / hash_length)  # Garante blocos suficientes
@@ -18,7 +18,7 @@ def gerar_mascara(seed, tamanho, hash_func=hashlib.sha256):
     return output[:tamanho]
 
 # Prepara a mensagem para cifrar usando OAEP
-def oeap_cifrar(message, tamanho_chave, label=b"", hash_func=hashlib.sha256):
+def oeap_cifrar(message, tamanho_chave, label=b"", hash_func=hashlib.sha3_256):
     tamanho_mensagem = len(message)
     hash_tamanho = hash_func().digest_size
 
@@ -51,7 +51,7 @@ def oeap_cifrar(message, tamanho_chave, label=b"", hash_func=hashlib.sha256):
 
 # Recupera a mensagem original após decifrar o RSA
 # Desfaz o mascaramento e valida a integridade do bloco de dados
-def oeap_decifrar(mensagem_cifrada, tamanho_chave, label=b"", hash_func=hashlib.sha256):
+def oeap_decifrar(mensagem_cifrada, tamanho_chave, label=b"", hash_func=hashlib.sha3_256):
     tamanho_mensagem = len(mensagem_cifrada)
     hash_tamanho = hash_func().digest_size
 
@@ -133,7 +133,7 @@ if __name__ == "__main__":
 
     # Gera um par de chaves
     publica, privada = chave_rsa(1024)
-    texto_original = unidecode("Teste ç é ó í")
+    texto_original = unidecode("Teste ç é ó ídsadasd")
     mensagem_original = texto_original.encode('utf-8')
 
     print(f"\nmensagem original: {mensagem_original.decode()}")
