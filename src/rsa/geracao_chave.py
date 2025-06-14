@@ -1,22 +1,25 @@
 import random
-#from .teste_primalidade import talvez_primo
+
+# from .teste_primalidade import talvez_primo
 from teste_primalidade import talvez_primo
-from sympy import mod_inverse 
+from sympy import mod_inverse
+
 
 def gerar_primo(bits):
-      # Primo aleatório com a quantidade de bits especificada.
+    # Primo aleatório com a quantidade de bits especificada.
     while True:
         p = random.getrandbits(bits)
 
-          # Garante exatamente 'bits' de comprimento,
-          # MSB como 1.
-        p |= (1 << bits - 1)
+        # Garante exatamente 'bits' de comprimento,
+        # MSB como 1.
+        p |= 1 << bits - 1
 
-          # -> ímpar
+        # -> ímpar
         p |= 1
 
         if talvez_primo(p, k=40):
             return p
+
 
 def chave_rsa(bits=1024):
     p = gerar_primo(bits)
@@ -34,7 +37,7 @@ def chave_rsa(bits=1024):
     return (chave_publica, chave_privada)
 
 
-  # testes das funções !apagr!
+# testes das funções !apagr!
 
 """
 print(chave_rsa(bits=1024))
