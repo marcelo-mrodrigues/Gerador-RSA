@@ -2,13 +2,14 @@ import hashlib
 
 # ´´´python -m src.assinatura.assina
 
+
 def aplicar_hash(bytes: bytes) -> bytes:
     """
     Aplica a função de hash SHA-3 na mensagem.
 
     Parâmetros:
         bytes (bytes): Mensagem a ser hasheada
-    
+
     Retorna:
         bytes: Mensagem hasheada (32 bytes -> tamanho fixo)
     """
@@ -18,19 +19,19 @@ def aplicar_hash(bytes: bytes) -> bytes:
 def assinar(hash_bytes: bytes, chave_privada: tuple) -> bytes:
     """
     Assina valor de hash ao criptografá-lo com a chave privada.
-    
+
     Parâmetros:
         hash_bytes (bytes): Valor de hash em bytes
-        chave_privada (tuple): Chave privada (n,d) 
+        chave_privada (tuple): Chave privada (n,d)
 
     Retorna:
         bytes: Assinatura em bytes
     """
     n, d = chave_privada
     tamanho_chave = (chave_privada[0].bit_length() + 7) // 8
-    m = int.from_bytes(hash_bytes, 'big') # Mensagem vira inteiro
-    assinatura = pow(m, d, n) # c = m^d mod n
-    return assinatura.to_bytes(tamanho_chave, 'big')
+    m = int.from_bytes(hash_bytes, "big")  # Mensagem vira inteiro
+    assinatura = pow(m, d, n)  # c = m^d mod n
+    return assinatura.to_bytes(tamanho_chave, "big")
 
 
 def formatar_base64(data: bytes) -> str:
@@ -38,26 +39,26 @@ def formatar_base64(data: bytes) -> str:
     Primitiva da formatação em BASE64.
 
     Parâmetros:
-        data (bytes): Mensagem a ser formatada 
+        data (bytes): Mensagem a ser formatada
 
     Retorna:
         str: Mensagem formatada na BASE64
     """
-    BASE64_TABLE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+    BASE64_TABLE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
     result = []
 
     # Percorre os dados em blocos de 3 bytes em 3 bytes (24 bits)
     for i in range(0, len(data), 3):
-        bloco = data[i:i + 3]
-        bloco_len = len(bloco) # Verifica se o bloco tem 1, 2 ou 3 bytes
+        bloco = data[i: i + 3]
+        bloco_len = len(bloco)  # Verifica se o bloco tem 1, 2 ou 3 bytes
 
         # Converte o bloco de bytes em um inteiro
-        value = int.from_bytes(bloco, 'big')
+        value = int.from_bytes(bloco, "big")
 
         # Calcula bits que faltam pra completar 3 bytes
         missing_bits = (3 - bloco_len) * 8
-        
+
         # Preenche com zeros no final pra completar 3 bytes
         value <<= missing_bits
 
@@ -76,12 +77,12 @@ def formatar_base64(data: bytes) -> str:
 
     # Substitui últimos caracteres pelo padding se for preciso
     if padding:
-        result[-padding:] = '=' * padding
+        result[-padding:] = "=" * padding
 
-    return ''.join(result)
+    return "".join(result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from ..rsa.cifra_rsa import cifrar, decifrar
     from ..rsa.geracao_chave import chave_rsa
 
