@@ -1,6 +1,6 @@
 import random
 # from .teste_primalidade import talvez_primo
-from teste_primalidade import talvez_primo
+from rsa.teste_primalidade import talvez_primo
 from sympy import mod_inverse
 
 
@@ -41,3 +41,14 @@ def chave_rsa(bits=1024):
     return (chave_publica, chave_privada)
 
 
+def salvar_chave( chave , CAMINHO_ARQUIVO):
+    #  Salva a chave em um arquivo
+    with open(CAMINHO_ARQUIVO, 'w') as arquivo:
+        arquivo.write(f'{chave[0]},{chave[1]}')
+
+def carregar_chave(CAMINHO_ARQUIVO):
+    #  Carrega a chave de um arquivo)
+    with open(CAMINHO_ARQUIVO, 'r') as arquivo:
+        n , d_or_e = arquivo.read().split(',')
+        #  Converte os numeros de string para int novamente
+        return (int(n), int(d_or_e))
